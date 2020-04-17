@@ -1,0 +1,29 @@
+<div>
+
+    <table #table class="board">
+
+        <tr *ngFor="let row of matrix" id="row">
+
+            <td *ngFor="let cell of row">
+
+                <cell [color]="cell"></cell>
+                
+            </td>
+
+        </tr>
+
+    </table>
+    
+    <div #pieceHolder class="piece-holder">
+
+        <piece 
+            *ngFor="let piece of pieces" 
+            [type]="piece.type"
+            (cdkDragEnded)="dropped($event)" 
+            [cdkDragData]="piece.serial"
+            cdkDrag>
+        </piece>
+        
+    </div>
+
+</div>

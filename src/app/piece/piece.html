@@ -1,0 +1,7 @@
+<table class="piece">
+    <tr *ngFor="let row of matrix">
+        <td *ngFor="let cell of row">
+            <cell [color]="cell"></cell>
+        </td>
+    </tr>
+</table>
