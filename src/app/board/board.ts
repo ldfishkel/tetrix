@@ -24,17 +24,28 @@ export class Board implements OnInit
     
     ngOnInit() : void 
     {
-        this.matrix = []
+        let matrix = localStorage.getItem("matrix")
+        let pieces = localStorage.getItem("pieces")
 
-        for (var i: number = 0; i < 10; i++) 
+        if (!matrix)
         {
-            this.matrix[i] = [];
+            this.matrix = []
+    
+            for (var i: number = 0; i < 10; i++) 
+            {
+                this.matrix[i] = [];
+    
+                for(var j: number = 0; j< 10; j++) 
+                    this.matrix[i][j] = Color.Black
+            }
 
-            for(var j: number = 0; j< 10; j++) 
-                this.matrix[i][j] = Color.Black
+            this.fillHolder()
         }
-
-        this.fillHolder()
+        else
+        {
+            this.matrix = JSON.parse(matrix)
+            this.pieces = JSON.parse(pieces)
+        }
     }
     
     fillHolder() : void 
@@ -54,7 +65,7 @@ export class Board implements OnInit
             x : event.source.element.nativeElement.offsetLeft + dragged.x,
             y : event.source.element.nativeElement.offsetTop + dragged.y
         }
-      
+
         let type = this.pieces.find(p => p.serial == data).type
 
         let table = this.getTable()
@@ -75,11 +86,13 @@ export class Board implements OnInit
             if (this.pieces.length == 0)
                 this.fillHolder()
         }
+
+        localStorage.setItem("matrix", JSON.stringify(this.matrix))
+        localStorage.setItem("pieces", JSON.stringify(this.pieces))
     }
 
     checkLines() : void
     {
-        var table = this.getTable()
         var rows = [], cols = []
         let row = true, col = true
 
@@ -87,7 +100,7 @@ export class Board implements OnInit
         {
             row = true
             for (let j = 0; j < 10; j++)
-                if (table[i][j].isBlack)
+                if (this.matrix[i][j] == Color.Black)
                 {
                     row = false
                     break
@@ -101,7 +114,7 @@ export class Board implements OnInit
         {
             col = true
             for (let j = 0; j < 10; j++)
-                if (table[j][i].isBlack)
+                if (this.matrix[j][i] == Color.Black)
                 {
                     col = false
                     break
@@ -113,39 +126,16 @@ export class Board implements OnInit
 
         var renderer = this.renderer
         if (rows.length > 0)
-        {
-            setTimeout(function() {
-                rows.forEach(r => {
-                    for (let i = 0; i < 10; i++)
-                        renderer.setStyle(table[r][i].cell, "background-color", Color.Grey)
-                })
-            }, 250)
-
-            setTimeout(function() {
-                rows.forEach(r => {
-                    for (let i = 0; i < 10; i++)
-                        renderer.setStyle(table[r][i].cell, "background-color", Color.Black)
-                })
-            }, 500)
-
-        }
+            rows.forEach(r => {
+                for (let i = 0; i < 10; i++)
+                    this.matrix[r][i] = Color.Black
+            })
         
         if (cols.length > 0)
-        {
-            setTimeout(function() {
-                cols.forEach(c => {
-                    for (let i = 0; i < 10; i++)
-                        renderer.setStyle(table[i][c].cell, "background-color", Color.Silver)
-                })
-            }, 250)
-
-            setTimeout(function() {
-                cols.forEach(c => {
-                    for (let i = 0; i < 10; i++)
-                        renderer.setStyle(table[i][c].cell, "background-color", Color.Black)
-                })
-            }, 750)
-        }
+            cols.forEach(c => {
+                for (let i = 0; i < 10; i++)
+                    this.matrix[i][c] = Color.Black
+            })
     }
 
     applyPiece(table: any, piece : any) : void
@@ -153,7 +143,10 @@ export class Board implements OnInit
         for (let i = 0; i < 5; i++)
             for (let j = 0; j < 5; j++)
                 if (piece[i][j] != null)
-                        this.renderer.setStyle(this.getMatchingTableCell(table, piece[i][j]), "background-color", piece[i][j].color)
+                {
+                    let pos = this.getMatchingTableCell(table, piece[i][j])
+                    this.matrix[pos.x][pos.y] = piece[i][j].color
+                }
     }
 
     getMatchingTableCell(table: any, pieceCell: any) : any 
@@ -162,7 +155,7 @@ export class Board implements OnInit
             for (let j = 0; j < 10; j++)
                 if (this.matchPosition(table[i][j], pieceCell))
                     if (table[i][j].isBlack)
-                        return table[i][j].cell
+                        return {x : i, y: j}
 
         return null
     }
@@ -193,7 +186,7 @@ export class Board implements OnInit
 
     matchPosition(tableCell: any, pieceCell: any) : boolean
     {
-        let tolerance = 30 / 2
+        let tolerance = 20 / 2
 
         let x1 = tableCell.x - tolerance
         let x2 = tableCell.x + tolerance
@@ -210,7 +203,7 @@ export class Board implements OnInit
     {
         let piece = []
         let map = PieceMapping.map(type)
-        let tolerance : number = 34
+        let tolerance : number = 24
 
         for (let i = 0; i < 5; i++)
         {
