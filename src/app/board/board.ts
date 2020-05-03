@@ -19,6 +19,8 @@ export class Board implements OnInit
     pieces : PieceRef[] = []
 
     count : number = 0
+    points : number = 0
+    maxPoints : number = 0
 
     constructor (private renderer: Renderer2) {}
     
@@ -27,9 +29,16 @@ export class Board implements OnInit
         let matrix = localStorage.getItem("matrix")
         let pieces = localStorage.getItem("pieces")
 
+        this.initialize(matrix, pieces)
+    }
+    
+    initialize(matrix : any, pieces : any)
+    {
         if (!matrix)
         {
+            this.points = 0
             this.matrix = []
+            this.pieces = []
     
             for (var i: number = 0; i < 10; i++) 
             {
@@ -38,14 +47,27 @@ export class Board implements OnInit
                 for(var j: number = 0; j< 10; j++) 
                     this.matrix[i][j] = Color.Black
             }
-
+    
             this.fillHolder()
         }
         else
         {
+            let points = localStorage.getItem("points")
+            let maxPoints = localStorage.getItem("maxPoints")
+
             this.matrix = JSON.parse(matrix)
             this.pieces = JSON.parse(pieces)
+            
+            if (points)
+                this.points = JSON.parse(points)
+            if (maxPoints)
+                this.maxPoints = JSON.parse(maxPoints)
         }
+    }
+
+    restart() : void 
+    {
+        this.initialize(null, null)
     }
     
     fillHolder() : void 
@@ -89,6 +111,13 @@ export class Board implements OnInit
 
         localStorage.setItem("matrix", JSON.stringify(this.matrix))
         localStorage.setItem("pieces", JSON.stringify(this.pieces))
+        localStorage.setItem("points", JSON.stringify(this.points))
+
+        if (this.points > this.maxPoints)
+        {
+            this.maxPoints = this.points
+            localStorage.setItem("maxPoints", JSON.stringify(this.maxPoints))
+        }
     }
 
     checkLines() : void
@@ -128,13 +157,19 @@ export class Board implements OnInit
         if (rows.length > 0)
             rows.forEach(r => {
                 for (let i = 0; i < 10; i++)
+                {
+                    this.points += 10   
                     this.matrix[r][i] = Color.Black
+                }
             })
         
         if (cols.length > 0)
             cols.forEach(c => {
                 for (let i = 0; i < 10; i++)
+                {
+                    this.points += 10   
                     this.matrix[i][c] = Color.Black
+                }
             })
     }
 
@@ -146,6 +181,7 @@ export class Board implements OnInit
                 {
                     let pos = this.getMatchingTableCell(table, piece[i][j])
                     this.matrix[pos.x][pos.y] = piece[i][j].color
+                    this.points += 1   
                 }
     }
 

@@ -6,7 +6,7 @@
 }
 
 .piece-holder {
-    height: 400px;
+    height: 200px;
     background-color: gray;
     margin: 0 auto;
     padding: 10px;
@@ -19,4 +19,17 @@
 .piece-holder > * {
     margin-left: 5px;
     margin-right: 5px;
+}
+
+.restart {
+    border-radius: 50%;
+    background-color: rgb(56, 56, 56);
+    border: 1px solid black;
+    width: 30px;
+    display: inline-block;
+    float: left;
+}
+
+.restart:hover {
+    background-color: white;
 }
